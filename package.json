@@ -1,0 +1,17 @@
+{
+  "name": "rocketseat-GoBarber",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/NegoPrograma/rocketseat-GoBarber.git",
+  "author": "Isaac de Souza <isaacde2012@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "dev": "nodemon src/server.js"
+  },
+  "dependencies":{
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4"
+  }
+}
