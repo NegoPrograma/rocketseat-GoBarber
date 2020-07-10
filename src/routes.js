@@ -4,9 +4,8 @@ const routes = new Router();
 
 routes.get('/', (req, res) => {
     res.json({
-        hello: "worldo"
+        hello: 'worldo',
     });
 });
-
 
 export default routes;
