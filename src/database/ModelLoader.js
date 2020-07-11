@@ -3,8 +3,10 @@ import User from '../app/models/User';
 import databaseConfig from '../config/database';
 
 const models = [User];
-
-class Database {
+/**
+ * Classe responsável por deixar os models se conectarem ao BD.
+ */
+class ModelLoader {
     constructor() {
         this.init();
     }
@@ -18,4 +20,4 @@ class Database {
     }
 }
 
-export default new Database();
+export default new ModelLoader();

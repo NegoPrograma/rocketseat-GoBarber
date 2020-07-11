@@ -1,6 +1,6 @@
 import express from 'express';
 import routes from './routes';
-import './database';
+import './database/ModelLoader';
 
 class App {
     // método executado em instância
