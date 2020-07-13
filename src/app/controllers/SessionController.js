@@ -1,9 +1,21 @@
 import jwt from 'jsonwebtoken';
+import * as Yup from 'yup';
 
+import auth from '../../config/auth';
 import User from '../models/User';
 
 class SessionController {
     async store(req, res) {
+        const schema = Yup.object().shape({
+            name: Yup.string().required(),
+            email: Yup.string().email().required(),
+            password: Yup.string().required(),
+        });
+
+        if (!(await schema.isValid(req.body))) {
+            return res.status(400).json({ error: 'validation failed.' });
+        }
+
         const { email, password } = req.body;
 
         const user = await User.findOne({
@@ -32,8 +44,8 @@ class SessionController {
              * da sua aplicação, o terceiro parâmetro é opcional, são configurações
              * especificas que seu jwt tem.
              */
-            token: jwt.sign({ id }, 'f77b4d34233648144574880b83f4e963', {
-                expiresIn: '7d',
+            token: jwt.sign({ id }, auth.secret, {
+                expiresIn: auth.expiresIn,
             }),
         });
     }
