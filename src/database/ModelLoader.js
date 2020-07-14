@@ -1,8 +1,9 @@
 import Sequelize from 'sequelize';
 import User from '../app/models/User';
-import databaseConfig from '../config/database';
+import File from '../app/models/File';
+import databaseConfig from '../config/databaseConfig';
 
-const models = [User];
+const models = [User, File];
 /**
  * Classe responsável por deixar os models se conectarem ao BD.
  */
@@ -16,6 +17,11 @@ class ModelLoader {
 
         models.map((model) => {
             model.init(this.connection);
+        });
+        models.map((model) => {
+            if (model.associate) {
+                model.associate(this.connection.models);
+            }
         });
     }
 }
