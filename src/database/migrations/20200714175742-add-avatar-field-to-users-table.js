@@ -4,7 +4,7 @@ module.exports = {
             type: Sequelize.INTEGER,
             references: {
                 model: 'files',
-                key: 'id'
+                key: 'id',
             },
             onUpdate: 'CASCADE',
             onDelete: 'SET NULL',
@@ -13,6 +13,6 @@ module.exports = {
     },
 
     down: async (queryInterface, Sequelize) => {
-        return queryInterface.removeColumn('users','avatar_id');
+        return queryInterface.removeColumn('users', 'avatar_id');
     },
 };
