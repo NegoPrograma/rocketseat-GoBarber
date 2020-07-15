@@ -1,9 +1,5 @@
 import * as Yup from 'yup';
-import {
-    startOfHour,
-    parseISO,
-    isBefore
-} from 'date-fns';
+import { startOfHour, parseISO, isBefore } from 'date-fns';
 import Appointment from '../models/Appointment';
 import User from '../models/User';
 import File from '../models/File';
@@ -18,18 +14,22 @@ class AppointmentController {
             },
             attributes: ['id', 'date'],
             order: ['date'],
-            limit:20,
+            limit: 20,
             offset: (page - 1) * 20,
-            include: [{
-                model: User,
-                as: 'provider',
-                attributes: ['id', 'name'],
-                include: [{
-                    model: File,
-                    as: 'avatar',
-                    attributes: ['id', 'path', 'url'],
-                }, ],
-            }, ],
+            include: [
+                {
+                    model: User,
+                    as: 'provider',
+                    attributes: ['id', 'name'],
+                    include: [
+                        {
+                            model: File,
+                            as: 'avatar',
+                            attributes: ['id', 'path', 'url'],
+                        },
+                    ],
+                },
+            ],
         });
         return res.json(appointments);
     }
@@ -46,10 +46,7 @@ class AppointmentController {
             });
         }
 
-        const {
-            provider_id,
-            date
-        } = req.body;
+        const { provider_id, date } = req.body;
 
         /**
          * Check if the provided id really belongs
