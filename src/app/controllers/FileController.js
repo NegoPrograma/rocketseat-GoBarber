@@ -1,10 +1,11 @@
-import multer from 'multer';
-import multerConfig from '../../config/multerConfig';
 import File from '../models/File';
 
 class FileController {
     async store(req, res) {
-        const { originalname: name, filename: path } = req.file; // json gerado a partir da função de upload do multer.
+        const {
+            originalname: name,
+            filename: path
+        } = req.file; // json gerado a partir da função de upload do multer.
 
         const file = await File.create({
             name,

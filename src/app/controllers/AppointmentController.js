@@ -72,6 +72,16 @@ class AppointmentController {
             });
         }
         /**
+         * This may be silly, but i'm checking if the user isn't actually
+         * trying to appoint a service with him or herself.
+         */
+        if (req.userId === provider_id) {
+            return res.status(401).json({
+                error: 'You cannot appoint a service with yourself!',
+            });
+        }
+
+        /**
          * startofhour funciona equivalente a um math.floor
          * mas pra horas. retira os min e segundos.
          * parseISO transforma a string date em um
@@ -115,7 +125,7 @@ class AppointmentController {
         const formattedDate = format(
             hourStart,
             "'dia' dd 'de' MMMM', às' H:mm'h'", {
-                locale: pt
+                locale: pt,
             }
         );
         await Notification.create({
