@@ -1,10 +1,5 @@
 import * as Yup from 'yup';
-import {
-    startOfHour,
-    parseISO,
-    isBefore,
-    format
-} from 'date-fns';
+import { startOfHour, parseISO, isBefore, format, subHours } from 'date-fns';
 import pt from 'date-fns/locale/pt';
 import Appointment from '../models/Appointment';
 import User from '../models/User';
@@ -13,9 +8,7 @@ import Notification from '../schemas/Notification';
 
 class AppointmentController {
     async index(req, res) {
-        const {
-            page = 1
-        } = req.query;
+        const { page = 1 } = req.query;
         const appointments = await Appointment.findAll({
             where: {
                 user_id: req.userId,
@@ -25,16 +18,20 @@ class AppointmentController {
             order: ['date'],
             limit: 20,
             offset: (page - 1) * 20,
-            include: [{
-                model: User,
-                as: 'provider',
-                attributes: ['id', 'name'],
-                include: [{
-                    model: File,
-                    as: 'avatar',
-                    attributes: ['id', 'path', 'url'],
-                }, ],
-            }, ],
+            include: [
+                {
+                    model: User,
+                    as: 'provider',
+                    attributes: ['id', 'name'],
+                    include: [
+                        {
+                            model: File,
+                            as: 'avatar',
+                            attributes: ['id', 'path', 'url'],
+                        },
+                    ],
+                },
+            ],
         });
         return res.json(appointments);
     }
@@ -51,10 +48,7 @@ class AppointmentController {
             });
         }
 
-        const {
-            provider_id,
-            date
-        } = req.body;
+        const { provider_id, date } = req.body;
 
         /**
          * Check if the provided id really belongs
@@ -124,7 +118,8 @@ class AppointmentController {
         const user = await User.findByPk(req.userId);
         const formattedDate = format(
             hourStart,
-            "'dia' dd 'de' MMMM', às' H:mm'h'", {
+            "'dia' dd 'de' MMMM', às' H:mm'h'",
+            {
                 locale: pt,
             }
         );
@@ -132,6 +127,39 @@ class AppointmentController {
             content: `Novo agendamento de ${user.name} para ${formattedDate}`,
             user: provider_id,
         });
+        return res.json(appointment);
+    }
+
+    async delete(req, res) {
+        const { id } = req.params;
+
+        const appointment = await Appointment.findByPk(id);
+
+        if (!appointment) {
+            return res.status(401).json({
+                error: 'Appointment does not exist.',
+            });
+        }
+        if (appointment.user_id !== req.userId) {
+            return res.status(401).json({
+                error: 'You can only cancel appointments made by you.',
+            });
+        }
+
+        const maxHourPermittedForCancel = subHours(appointment.date, 2);
+        const now = new Date();
+
+        if (isBefore(maxHourPermittedForCancel, now)) {
+            return res.status(401).json({
+                error:
+                    'You can only cancel appointments with 2 hours of advance.',
+            });
+        }
+
+        appointment.canceled_at = now.toUTCString();
+
+        await appointment.save();
+
         return res.json(appointment);
     }
 }
