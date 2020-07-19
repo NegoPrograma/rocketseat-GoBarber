@@ -6,10 +6,12 @@
   "author": "Isaac de Souza <isaacde2012@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon src/server.js"
+    "dev": "nodemon src/server.js",
+    "queue":"nodemon src/Queue.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "bee-queue": "^1.2.3",
     "date-fns": "^2.0.0-beta.5",
     "express": "^4.17.1",
     "express-handlebars": "^5.1.0",

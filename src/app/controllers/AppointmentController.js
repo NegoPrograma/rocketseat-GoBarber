@@ -1,24 +1,17 @@
 import * as Yup from 'yup';
-import {
-    startOfHour,
-    parseISO,
-    isBefore,
-    format,
-    subHours
-} from 'date-fns';
+import { startOfHour, parseISO, isBefore, format, subHours } from 'date-fns';
 import pt from 'date-fns/locale/pt';
 
 import Appointment from '../models/Appointment';
 import User from '../models/User';
 import File from '../models/File';
 import Notification from '../schemas/Notification';
-import MailSender from '../../lib/MailSender';
-
+import Queue from "../../lib/Queue";
+import CancellationMail from "../jobs/CancellationMail";
 class AppointmentController {
+
     async index(req, res) {
-        const {
-            page = 1
-        } = req.query;
+        const { page = 1 } = req.query;
         const appointments = await Appointment.findAll({
             where: {
                 user_id: req.userId,
@@ -28,16 +21,20 @@ class AppointmentController {
             order: ['date'],
             limit: 20,
             offset: (page - 1) * 20,
-            include: [{
-                model: User,
-                as: 'provider',
-                attributes: ['id', 'name'],
-                include: [{
-                    model: File,
-                    as: 'avatar',
-                    attributes: ['id', 'path', 'url'],
-                }, ],
-            }, ],
+            include: [
+                {
+                    model: User,
+                    as: 'provider',
+                    attributes: ['id', 'name'],
+                    include: [
+                        {
+                            model: File,
+                            as: 'avatar',
+                            attributes: ['id', 'path', 'url'],
+                        },
+                    ],
+                },
+            ],
         });
         return res.json(appointments);
     }
@@ -54,10 +51,7 @@ class AppointmentController {
             });
         }
 
-        const {
-            provider_id,
-            date
-        } = req.body;
+        const { provider_id, date } = req.body;
 
         /**
          * Check if the provided id really belongs
@@ -127,7 +121,8 @@ class AppointmentController {
         const user = await User.findByPk(req.userId);
         const formattedDate = format(
             hourStart,
-            "'dia' dd 'de' MMMM', às' H:mm'h'", {
+            "'dia' dd 'de' MMMM', às' H:mm'h'",
+            {
                 locale: pt,
             }
         );
@@ -139,12 +134,11 @@ class AppointmentController {
     }
 
     async delete(req, res) {
-        const {
-            id
-        } = req.params;
+        const { id } = req.params;
 
         const appointment = await Appointment.findByPk(id, {
-            include: [{
+            include: [
+                {
                     model: User,
                     as: 'provider',
                     attributes: ['name', 'email'],
@@ -173,7 +167,8 @@ class AppointmentController {
 
         if (isBefore(maxHourPermittedForCancel, now)) {
             return res.status(401).json({
-                error: 'You can only cancel appointments with 2 hours of advance.',
+                error:
+                    'You can only cancel appointments with 2 hours of advance.',
             });
         }
 
@@ -183,22 +178,10 @@ class AppointmentController {
         /**
          * send email notifying provider of service cancel.
          */
-        await MailSender.sendMail({
-            to: `${appointment.provider.name} <${appointment.provider.email}>`,
-            subject: 'Agendamento cancelado.',
-            template: 'cancellation',
-            context: {
-                provider: appointment.provider.name,
-                user: appointment.user.name,
-                date: format(
-                    appointment.date,
-                    "'dia' dd 'de' MMMM', às' H:mm'h'",
-                    {
-                        locale: pt,
-                    }
-                ),
-            },
+        await Queue.add(CancellationMail.key, {
+            appointment,
         });
+
         return res.json(appointment);
     }
 }

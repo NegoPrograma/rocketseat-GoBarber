@@ -1,19 +1,12 @@
 import nodemailer from 'nodemailer';
-import {
-    resolve
-} from 'path';
+import { resolve } from 'path';
 import exphbs from 'express-handlebars';
 import nodemailerhbs from 'nodemailer-express-handlebars';
 import mailConfig from '../config/mail';
 
 class MailSender {
     constructor() {
-        const {
-            host,
-            port,
-            secure,
-            auth
-        } = mailConfig;
+        const { host, port, secure, auth } = mailConfig;
 
         this.transporter = nodemailer.createTransport({
             host,
