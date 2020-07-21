@@ -34,6 +34,7 @@ class ModelLoader {
             {
                 useNewUrlParser: true,
                 useFindAndModify: true,
+                useUnifiedTopology: true,
             }
         );
     }
