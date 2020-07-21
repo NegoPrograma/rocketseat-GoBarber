@@ -4,17 +4,15 @@ import {
     setHours,
     setMinutes,
     setSeconds,
+    format,
+    isAfter,
 } from 'date-fns';
-import {
-    Op
-} from 'sequelize';
+import { Op } from 'sequelize';
 import Appointment from '../models/Appointment';
 
 class AvaiableController {
     async index(req, res) {
-        const {
-            date
-        } = req.query;
+        const { date } = req.query;
         if (!date) {
             res.status(400).json({
                 error: 'date not provided.',
@@ -52,11 +50,29 @@ class AvaiableController {
         ];
 
         const avaiable = schedule.map((time) => {
-            const [hour,minute] = time.split(':');
-            const value = setSeconds(setMinutes(),0)
+            const [hour, minute] = time.split(':');
+            const value = setSeconds(
+                setMinutes(setHours(searchDate, hour), minute),
+                0
+            );
+            let is_avaiable = false;
+            if (isAfter(value, new Date()))
+                if (
+                    !appointments.find(
+                        (appointment) =>
+                            format(appointment.date, 'HH:mm') === time
+                    )
+                )
+                    is_avaiable = true;
+
+            return {
+                time,
+                value: format(value, "yyyy-MM-dd'T'HH:mm:ssxxx"),
+                is_avaiable,
+            };
         });
 
-        return res.json();
+        return res.json(avaiable);
     }
 }
 
