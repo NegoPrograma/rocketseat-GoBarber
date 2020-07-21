@@ -1,7 +1,6 @@
 import * as Yup from 'yup';
 import { startOfHour, parseISO, isBefore, format, subHours } from 'date-fns';
 import pt from 'date-fns/locale/pt';
-
 import Appointment from '../models/Appointment';
 import User from '../models/User';
 import File from '../models/File';
@@ -17,7 +16,7 @@ class AppointmentController {
                 user_id: req.userId,
                 canceled_at: null,
             },
-            attributes: ['id', 'date'],
+            attributes: ['id', 'date', 'past','cancelable'],
             order: ['date'],
             limit: 20,
             offset: (page - 1) * 20,
