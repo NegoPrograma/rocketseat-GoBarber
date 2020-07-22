@@ -10,6 +10,6 @@ export default {
      * quanto tempo esse token
      * é válido.
      */
-    secret: 'f77b4d34233648144574880b83f4e963',
+    secret: process.env.APP_SECRET,
     expiresIn: '7d',
 };
